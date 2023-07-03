@@ -17,18 +17,16 @@ export function VisibilityButton({
       onPress={() => onChangeVisibility?.(!visibility)}
       size="xs"
       variant="link"
-      color="gray"
       icon={
         <Icon
-          size={18}
           {...(visibility
             ? {
-                color: 'gray8',
+                color: 'intentsBase8',
                 icon: 'Eye',
               }
             : {
                 color: 'accent9',
-                icon: 'EyeSlash',
+                icon: 'EyeClosed',
               })}
         />
       }

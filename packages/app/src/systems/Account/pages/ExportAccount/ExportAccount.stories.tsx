@@ -1,4 +1,4 @@
-import { BoxCentered, Button } from '@fuel-ui/react';
+import { Box, Button, Text } from '@fuel-ui/react';
 import type { ComponentStoryFn, Meta } from '@storybook/react';
 
 import { createMockAccount, useAccounts } from '../..';
@@ -24,16 +24,19 @@ const Template: ComponentStoryFn<typeof ExportAccount> = () => {
   const { account, isLoading, handlers } = useAccounts();
   return (
     <Layout isLoading={isLoading}>
-      <BoxCentered css={{ minW: '100%', minH: '100%' }}>
-        {account && (
-          <Button
-            onPress={() => handlers.goToExport(account.address)}
-            isLoading={isLoading}
-          >
-            Toggle Modal
-          </Button>
-        )}
-      </BoxCentered>
+      <Box.Centered css={{ minW: '100%', minH: '100%' }}>
+        <Box.Stack>
+          <Text>Password: 123123123</Text>
+          {account && (
+            <Button
+              onPress={() => handlers.goToExport(account.address)}
+              isLoading={isLoading}
+            >
+              Toggle Modal
+            </Button>
+          )}
+        </Box.Stack>
+      </Box.Centered>
     </Layout>
   );
 };

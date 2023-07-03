@@ -1,6 +1,6 @@
 import type { ThemeUtilsCSS } from '@fuel-ui/css';
 import { cssObj } from '@fuel-ui/css';
-import { Copyable, Flex, Text, Tooltip } from '@fuel-ui/react';
+import { Box, Copyable, Text, Tooltip } from '@fuel-ui/react';
 import { Address, isB256, isBech32 } from 'fuels';
 
 import { shortAddress } from '~/systems/Core';
@@ -17,31 +17,31 @@ export const FuelAddress = ({ address, css }: AddressProps) => {
     : '';
 
   return (
-    <Flex css={styles.root}>
+    <Box.Flex css={styles.root}>
       <Copyable
         value={fuelAddress}
-        css={{ ...styles.copyable, ...css }}
+        css={styles.copyable}
         aria-label={fuelAddress}
         data-invalid-address={!isValidAddress}
       >
         <Tooltip content={fuelAddress} className="address_tooltip" side="top">
-          <Text>{shortAddress(fuelAddress)}</Text>
+          <Text css={css}>{shortAddress(fuelAddress)}</Text>
         </Tooltip>
       </Copyable>
-    </Flex>
+    </Box.Flex>
   );
 };
 
 const styles = {
-  root: {
+  root: cssObj({
     '.address_tooltip': cssObj({
-      fontSize: '$xs',
+      fontSize: '$sm',
       lineHeight: '$4',
       maxWidth: 125,
       textAlign: 'center',
       wordWrap: 'break-word',
     }),
-  },
+  }),
   copyable: cssObj({
     // to make sure we're using same text format, we just hide the copy icon but still use Copyable.
     '&[data-invalid-address="true"]': {

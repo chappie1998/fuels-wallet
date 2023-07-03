@@ -2,7 +2,7 @@ import { encrypt } from '@fuel-ts/keystore';
 import { Mnemonic } from '@fuel-ts/mnemonic';
 import type { Account as WalletAccount } from '@fuel-ts/wallet-manager';
 import { WalletManager } from '@fuel-ts/wallet-manager';
-import type { Account, Network } from '@fuel-wallet/types';
+import type { Account, Asset, Connection, Network } from '@fuel-wallet/types';
 import type { Page } from '@playwright/test';
 import { Address } from 'fuels';
 
@@ -16,7 +16,7 @@ export const WALLET_PASSWORD = 'Qwe1234567$';
 export const PRIVATE_KEY =
   '0xa449b1ffee0e2205fa924c6740cc48b3b473aa28587df6dab12abc245d1f5291';
 
-const DEFAULT_NETWORKS: Array<Network> = [
+export const DEFAULT_NETWORKS: Array<Network> = [
   {
     id: '1',
     isSelected: true,
@@ -44,6 +44,15 @@ export const CUSTOM_ASSET_2 = {
   assetId: '0x566012155ae253353c7df01f36c8f6249c94131a69a3484bdb0234e3822b5d91',
   name: 'New1',
   symbol: 'NEW1',
+  imageUrl:
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png',
+  isCustom: true,
+};
+
+export const ALT_ASSET = {
+  assetId: '0x0000000000000000000000000000000000000000000000000000000000000001',
+  name: 'Alt Token',
+  symbol: 'ALT',
   imageUrl:
     'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png',
   isCustom: true,
@@ -89,10 +98,22 @@ export function createAccounts(
   return Promise.all(
     new Array(numberOfAccounts).fill(0).map(async (_, index) => {
       const walletAccount = await manager.addAccount();
-      const acounnt = await createAccount(walletAccount, index);
-      return acounnt;
+      const account = createAccount(walletAccount, index);
+      return account;
     })
   );
+}
+
+export function createConnections(accounts: Array<string>): Connection[] {
+  const numberOfConnections = 1;
+  return new Array(numberOfConnections).fill(0).map(() => {
+    return {
+      origin: 'http://localhost:3004',
+      title: 'mock connection',
+      favIconUrl: '',
+      accounts,
+    };
+  });
 }
 
 type SerializedVault = {
@@ -104,7 +125,7 @@ export async function serializeVault(
   manager: WalletManager
 ): Promise<SerializedVault> {
   const vaultKey = manager.STORAGE_KEY;
-  const vaultData = await manager.exportVault(0);
+  const vaultData = manager.exportVault(0);
   const encryptedData = await encrypt(WALLET_PASSWORD, {
     vaults: [
       {
@@ -127,11 +148,16 @@ export async function mockData(
   const manager = await createManager(mnemonic);
   const accounts = await createAccounts(manager, numberOfAccounts);
   const vault = await serializeVault(manager);
+  const connections = createConnections(
+    accounts.map((account) => account.address)
+  );
 
   await page.evaluate(
-    ([accounts, networks, vault, password]: [
+    ([accounts, networks, connections, assets, vault, password]: [
       Array<Account>,
       Array<Network>,
+      Array<Connection>,
+      Array<Asset>,
       SerializedVault,
       string
     ]) => {
@@ -139,12 +165,16 @@ export async function mockData(
         (async function main() {
           try {
             const fuelDB = window.fuelDB;
+            await fuelDB.errors.clear();
             await fuelDB.vaults.clear();
             await fuelDB.vaults.add(vault);
             await fuelDB.accounts.clear();
             await fuelDB.accounts.bulkAdd(accounts);
             await fuelDB.networks.clear();
             await fuelDB.networks.bulkAdd(networks);
+            await fuelDB.connections.clear();
+            await fuelDB.connections.bulkAdd(connections);
+            await fuelDB.assets.bulkAdd(assets);
             resolve(await fuelDB.networks.toArray());
           } catch (err: unknown) {
             reject(err);
@@ -154,7 +184,7 @@ export async function mockData(
         })();
       });
     },
-    [accounts, networks, vault, WALLET_PASSWORD]
+    [accounts, networks, connections, [ALT_ASSET], vault, WALLET_PASSWORD]
   );
   await reload(page);
 
@@ -168,6 +198,7 @@ export async function mockData(
     manager,
     accounts: accountsWithPkey,
     networks,
+    connections,
   };
 }
 

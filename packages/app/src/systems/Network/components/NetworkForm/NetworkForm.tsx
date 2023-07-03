@@ -1,53 +1,118 @@
-import { Stack, Input, HelperIcon } from '@fuel-ui/react';
+import { cssObj } from '@fuel-ui/css';
+import {
+  Input,
+  HelperIcon,
+  Card,
+  Text,
+  Button,
+  Spinner,
+  Box,
+} from '@fuel-ui/react';
+import { motion } from 'framer-motion';
 
 import type { UseNetworkFormReturn } from '../../hooks';
 
-import { ControlledField } from '~/systems/Core';
+import { animations, ControlledField } from '~/systems/Core';
+
+const MotionCard = motion(Card);
+const MotionInput = motion(Input);
 
 export type NetworkFormProps = {
   form: UseNetworkFormReturn;
+  isEditing: boolean;
+  isLoading?: boolean;
 };
 
-export function NetworkForm({ form }: NetworkFormProps) {
-  const { control, formState } = form;
+export function NetworkForm({ form, isEditing, isLoading }: NetworkFormProps) {
+  const { control, formState, getValues } = form;
+
+  const name = getValues('name');
+  const url = getValues('url');
+  const showReview = !isEditing && name;
+
+  function onChangeUrl() {
+    form.setValue('name', '', { shouldValidate: true });
+  }
+
   return (
-    <Stack css={{ width: '100%' }} gap="$4">
-      <ControlledField
-        control={control}
-        name="name"
-        label="Name"
-        isRequired
-        isInvalid={Boolean(formState.errors?.name)}
-        render={({ field }) => (
-          <Input>
-            <Input.Field
-              {...field}
-              aria-label="Network name"
-              placeholder="Name of your network..."
-            />
-          </Input>
-        )}
-      />
-      <ControlledField
-        control={control}
-        name="url"
-        isRequired
-        isInvalid={Boolean(formState.errors?.url)}
-        label={
-          <HelperIcon message="The provider URL of your network">
-            URL
-          </HelperIcon>
-        }
-        render={({ field }) => (
-          <Input>
-            <Input.Field
-              {...field}
-              aria-label="Network URL"
-              placeholder="URL of your network..."
-            />
-          </Input>
-        )}
-      />
-    </Stack>
+    <Box.Stack css={{ width: '100%' }} gap="$4">
+      {showReview && (
+        <MotionCard {...animations.slideInTop()}>
+          <Card.Header space="compact" css={styles.header}>
+            <Text>You&apos;re adding this network</Text>
+            <Button size="xs" variant="outlined" onPress={onChangeUrl}>
+              Change
+            </Button>
+          </Card.Header>
+          <Card.Body css={{ p: '$3' }}>
+            <Text as="h2">{name}</Text>
+            <Text fontSize="sm">{url}</Text>
+          </Card.Body>
+        </MotionCard>
+      )}
+      {!showReview && (
+        <ControlledField
+          control={control}
+          name="url"
+          css={styles.url}
+          isDisabled={isEditing || isLoading}
+          isRequired
+          isInvalid={Boolean(formState.errors?.url)}
+          label={
+            <HelperIcon message="The provider URL of your network">
+              URL
+            </HelperIcon>
+          }
+          render={({ field }) => (
+            <MotionInput {...animations.slideInTop()}>
+              <Input.Field
+                {...field}
+                aria-label="Network URL"
+                placeholder="https://node.fuel.network/graphql"
+              />
+              {isLoading && (
+                <Input.ElementRight>
+                  <Spinner />
+                </Input.ElementRight>
+              )}
+            </MotionInput>
+          )}
+        />
+      )}
+      {isEditing && (
+        <ControlledField
+          control={control}
+          name="name"
+          label="Name"
+          isRequired
+          isInvalid={Boolean(formState.errors?.name)}
+          render={({ field }) => (
+            <Input>
+              <Input.Field
+                {...field}
+                aria-label="Network name"
+                placeholder="Name of your network..."
+              />
+            </Input>
+          )}
+        />
+      )}
+    </Box.Stack>
   );
 }
+
+const styles = {
+  header: cssObj({
+    justifyContent: 'space-between',
+
+    '.fuel_Button': {
+      py: '$1',
+      height: '$6',
+    },
+  }),
+  url: cssObj({
+    'input[aria-disabled="true"]': {
+      opacity: 0.5,
+    },
+  }),
+};

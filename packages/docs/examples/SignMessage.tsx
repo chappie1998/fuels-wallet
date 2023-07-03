@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
-import { cssObj } from '@fuel-ui/css';
-import { Box, Stack, Button, Input, Tag } from '@fuel-ui/react';
+import { Box, Button, Input, Tag } from '@fuel-ui/react';
 import { useState } from 'react';
 
-import { ExampleBox } from '~/src/components/ExampleBox';
-import { useFuel } from '~/src/hooks/useFuel';
-import { useIsConnected } from '~/src/hooks/useIsConnected';
-import { useLoading } from '~/src/hooks/useLoading';
+import { ExampleBox } from '../src/components/ExampleBox';
+import { useFuel } from '../src/hooks/useFuel';
+import { useIsConnected } from '../src/hooks/useIsConnected';
+import { useLoading } from '../src/hooks/useLoading';
+
+import { docStyles } from './styles';
 
 export function SignMessage() {
   const [fuel, notDetected] = useFuel();
@@ -16,13 +17,14 @@ export function SignMessage() {
 
   const [handleSignMessage, isSingingMessage, errorSigningMessage] = useLoading(
     async (message: string) => {
-      console.debug('Request signature of message!');
+      if (!isConnected) await fuel.connect();
+      console.log('Request signature of message!');
       /* example:start */
       const accounts = await fuel.accounts();
       const account = accounts[0];
       const wallet = await fuel.getWallet(account);
       const signedMessage = await wallet.signMessage(message);
-      console.debug('Message signature', signedMessage);
+      console.log('Message signature', signedMessage);
       /* example:end */
       setSignedMessage(signedMessage);
     }
@@ -32,8 +34,8 @@ export function SignMessage() {
 
   return (
     <ExampleBox error={errorMessage}>
-      <Stack css={{ gap: '$4' }}>
-        <Input isDisabled={!isConnected} css={{ width: 300, height: 100 }}>
+      <Box.Stack css={{ gap: '$4' }}>
+        <Input isDisabled={!fuel} css={{ width: 300, height: 100 }}>
           <Input.Field
             as="textarea"
             value={message}
@@ -46,26 +48,22 @@ export function SignMessage() {
           <Button
             onPress={() => handleSignMessage(message)}
             isLoading={isSingingMessage}
-            isDisabled={isSingingMessage || !isConnected}
+            isDisabled={isSingingMessage || !fuel}
           >
             Sign Message
           </Button>
         </Box>
         {signedMessage && (
-          <Tag size="xs" color="gray" variant="ghost" css={styles.msg}>
+          <Tag
+            size="xs"
+            color="intentsBase"
+            variant="ghost"
+            css={docStyles.feedbackTag}
+          >
             {signedMessage}
           </Tag>
         )}
-      </Stack>
+      </Box.Stack>
     </ExampleBox>
   );
 }
-
-const styles = {
-  msg: cssObj({
-    borderRadius: '$md',
-    height: 'auto',
-    maxWidth: 320,
-    wordBreak: 'break-all',
-  }),
-};

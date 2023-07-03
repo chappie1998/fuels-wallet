@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
 import { cssObj } from '@fuel-ui/css';
-import { Button, Stack, Tag, Text } from '@fuel-ui/react';
+import { Box, Button, Tag, Text } from '@fuel-ui/react';
 import { useState } from 'react';
 
-import { ExampleBox } from '~/src/components/ExampleBox';
-import { useFuel } from '~/src/hooks/useFuel';
-import { useIsConnected } from '~/src/hooks/useIsConnected';
-import { useLoading } from '~/src/hooks/useLoading';
+import { ExampleBox } from '../src/components/ExampleBox';
+import { useFuel } from '../src/hooks/useFuel';
+import { useIsConnected } from '../src/hooks/useIsConnected';
+import { useLoading } from '../src/hooks/useLoading';
 
 export function ListAccounts() {
   const [fuel, notDetected] = useFuel();
@@ -14,10 +14,11 @@ export function ListAccounts() {
   const [accounts, setAccounts] = useState<Array<string>>([]);
   const [handleGetAccounts, isLoadingAccounts, errorGetAccounts] = useLoading(
     async () => {
-      console.debug('Request accounts to Wallet!');
+      if (!isConnected) await fuel.connect();
+      console.log('Request accounts to Wallet!');
       /* example:start */
       const accounts = await fuel.accounts();
-      console.debug('Accounts ', accounts);
+      console.log('Accounts ', accounts);
       /* example:end */
       setAccounts(accounts);
     }
@@ -27,24 +28,24 @@ export function ListAccounts() {
 
   return (
     <ExampleBox error={errorMessage}>
-      <Stack css={styles.root}>
+      <Box.Stack css={styles.root}>
         <Button
           onPress={handleGetAccounts}
           isLoading={isLoadingAccounts}
-          isDisabled={isLoadingAccounts || !isConnected}
+          isDisabled={isLoadingAccounts || !fuel}
         >
           Get accounts
         </Button>
         {Boolean(accounts.length) && (
-          <Stack gap="$1" css={{ mt: '$2' }}>
+          <Box.Stack gap="$1" css={{ mt: '$2' }}>
             {accounts.map((account) => (
-              <Tag size="xs" color="gray" variant="ghost" key={account}>
+              <Tag size="xs" variant="ghost" key={account}>
                 <Text>{account}</Text>
               </Tag>
             ))}
-          </Stack>
+          </Box.Stack>
         )}
-      </Stack>
+      </Box.Stack>
     </ExampleBox>
   );
 }
@@ -55,8 +56,8 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'flex-start',
 
-    '.fuel_tag > p': {
-      fontSize: '$xs',
+    '.fuel_Tag > p': {
+      fontSize: '$sm',
     },
   }),
 };

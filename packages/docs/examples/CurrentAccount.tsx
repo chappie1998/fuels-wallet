@@ -1,12 +1,12 @@
 /* eslint-disable no-console */
 import { cssObj } from '@fuel-ui/css';
-import { Button, Stack, Tag, Text } from '@fuel-ui/react';
+import { Box, Button, Tag, Text } from '@fuel-ui/react';
 import { useState } from 'react';
 
-import { ExampleBox } from '~/src/components/ExampleBox';
-import { useFuel } from '~/src/hooks/useFuel';
-import { useIsConnected } from '~/src/hooks/useIsConnected';
-import { useLoading } from '~/src/hooks/useLoading';
+import { ExampleBox } from '../src/components/ExampleBox';
+import { useFuel } from '../src/hooks/useFuel';
+import { useIsConnected } from '../src/hooks/useIsConnected';
+import { useLoading } from '../src/hooks/useLoading';
 
 export function CurrentAccount() {
   const [fuel, notDetected] = useFuel();
@@ -14,10 +14,11 @@ export function CurrentAccount() {
   const [currentAccount, setCurrentAccount] = useState<string>('');
   const [handleCurrentAccount, isLoadingCurrentAccount, errorCurrentAccount] =
     useLoading(async () => {
-      console.debug('Request currentAccount to Wallet!');
+      if (!isConnected) await fuel.connect();
+      console.log('Request currentAccount to Wallet!');
       /* example:start */
       const currentAccount = await fuel.currentAccount();
-      console.debug('Current Account ', currentAccount);
+      console.log('Current Account ', currentAccount);
       /* example:end */
       setCurrentAccount(currentAccount);
     });
@@ -26,22 +27,22 @@ export function CurrentAccount() {
 
   return (
     <ExampleBox error={errorMessage}>
-      <Stack css={styles.root}>
+      <Box.Stack css={styles.root}>
         <Button
           onPress={handleCurrentAccount}
           isLoading={isLoadingCurrentAccount}
-          isDisabled={isLoadingCurrentAccount || !isConnected}
+          isDisabled={isLoadingCurrentAccount || !fuel}
         >
           Get current account
         </Button>
-        <Stack gap="$3" css={{ mt: '$2' }}>
+        <Box.Stack gap="$3" css={{ mt: '$2' }}>
           {!!currentAccount && (
-            <Tag size="xs" color="gray" variant="ghost">
+            <Tag size="xs" variant="ghost">
               <Text key={currentAccount}>{currentAccount}</Text>
             </Tag>
           )}
-        </Stack>
-      </Stack>
+        </Box.Stack>
+      </Box.Stack>
     </ExampleBox>
   );
 }
@@ -52,8 +53,8 @@ const styles = {
     display: 'inline-flex',
     alignItems: 'flex-start',
 
-    '.fuel_tag > p': {
-      fontSize: '$xs',
+    '.fuel_Tag > p': {
+      fontSize: '$sm',
     },
   }),
 };

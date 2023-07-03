@@ -1,7 +1,13 @@
 import type { Browser, Page } from '@playwright/test';
 import test, { chromium } from '@playwright/test';
 
-import { getByAriaLabel, getButtonByText, visit, hasText } from '../commons';
+import {
+  getByAriaLabel,
+  getButtonByText,
+  visit,
+  hasText,
+  getElementByText,
+} from '../commons';
 import { logout } from '../commons/logout';
 import { WALLET_PASSWORD } from '../mocks';
 
@@ -21,7 +27,13 @@ test.describe('RecoverWallet', () => {
 
   test('should be able to recover a wallet', async () => {
     await visit(page, '/wallet');
-    await getButtonByText(page, /I already have a wallet/i).click();
+    await getElementByText(page, /Import seed phrase/i).click();
+
+    /** Accept terms */
+    await hasText(page, /Terms of use Agreement/i);
+    const agreeCheckbox = getByAriaLabel(page, 'Agree with terms');
+    await agreeCheckbox.click();
+    await getButtonByText(page, /Next: Seed Phrase/i).click();
 
     /** Copy words to clipboard area */
     await page.evaluate(`navigator.clipboard.writeText('${WORDS_12}')`);
@@ -30,16 +42,16 @@ test.describe('RecoverWallet', () => {
     await getButtonByText(page, /Paste/i).click();
 
     /** Confirm Mnemonic */
-    await hasText(page, /Enter your Recovery Phrase/i);
+    await hasText(page, /Recover wallet/i);
     await getButtonByText(page, /Paste/i).click();
     await getButtonByText(page, /Next/i).click();
 
     /** Adding password */
-    await hasText(page, /Encrypt your wallet/i);
-    const passwordInput = await getByAriaLabel(page, 'Your Password');
+    await hasText(page, /Create password for encryption/i);
+    const passwordInput = getByAriaLabel(page, 'Your Password');
     await passwordInput.type(WALLET_PASSWORD);
     await passwordInput.press('Tab');
-    const confirmPasswordInput = await getByAriaLabel(page, 'Confirm Password');
+    const confirmPasswordInput = getByAriaLabel(page, 'Confirm Password');
     await confirmPasswordInput.type(WALLET_PASSWORD);
     await confirmPasswordInput.press('Tab');
 
@@ -54,10 +66,16 @@ test.describe('RecoverWallet', () => {
   test('should be able to recover a wallet from 24-word mnemonic', async () => {
     await visit(page, '/wallet');
     await logout(page);
-    await getButtonByText(page, /I already have a wallet/i).click();
+    await getElementByText(page, /Import seed phrase/i).click();
+
+    /** Accept terms */
+    await hasText(page, /Terms of use Agreement/i);
+    const agreeCheckbox = getByAriaLabel(page, 'Agree with terms');
+    await agreeCheckbox.click();
+    await getButtonByText(page, /Next: Seed Phrase/i).click();
 
     await getByAriaLabel(page, 'Select format').selectOption(
-      'I have a 24 words seed phrase'
+      'I have a 24 words Seed Phrase'
     );
 
     /** Copy words to clipboard area */
@@ -67,16 +85,16 @@ test.describe('RecoverWallet', () => {
     await getButtonByText(page, /Paste/i).click();
 
     /** Confirm Mnemonic */
-    await hasText(page, /Enter your Recovery Phrase/i);
+    await hasText(page, /Recover wallet/i);
     await getButtonByText(page, /Paste/i).click();
     await getButtonByText(page, /Next/i).click();
 
     /** Adding password */
-    await hasText(page, /Encrypt your wallet/i);
-    const passwordInput = await getByAriaLabel(page, 'Your Password');
+    await hasText(page, /Create password for encryption/i);
+    const passwordInput = getByAriaLabel(page, 'Your Password');
     await passwordInput.type(WALLET_PASSWORD);
     await passwordInput.press('Tab');
-    const confirmPasswordInput = await getByAriaLabel(page, 'Confirm Password');
+    const confirmPasswordInput = getByAriaLabel(page, 'Confirm Password');
     await confirmPasswordInput.type(WALLET_PASSWORD);
     await confirmPasswordInput.press('Tab');
 

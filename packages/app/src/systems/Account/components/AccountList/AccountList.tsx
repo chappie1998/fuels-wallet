@@ -1,39 +1,39 @@
 import { cssObj } from '@fuel-ui/css';
-import { Button, CardList, Stack } from '@fuel-ui/react';
+import { Box, Button, CardList } from '@fuel-ui/react';
 import type { Account } from '@fuel-wallet/types';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { AccountItem } from '../AccountItem';
 
 export type AccountListProps = {
   accounts?: Account[];
+  canHideAccounts?: boolean;
+  hasHiddenAccounts?: boolean;
   isLoading?: boolean;
   onPress?: (account: Account) => void;
   onExport?: (address: string) => void;
+  onToggleHidden?: (address: string, isHidden: boolean) => void;
   onUpdate?: (address: string) => void;
 };
 
 export function AccountList({
   accounts,
+  canHideAccounts,
+  hasHiddenAccounts,
   isLoading,
   onPress,
   onExport,
   onUpdate,
+  onToggleHidden,
 }: AccountListProps) {
   const [showHidden, setShowHidden] = useState(() => false);
-  const [anyHiddenAccounts, setAnyHiddenAccounts] = useState(false);
 
   function toggle() {
     setShowHidden((s) => !s);
   }
 
-  useEffect(() => {
-    const hiddenAccounts = (accounts ?? []).some((acc) => acc.isHidden);
-    setAnyHiddenAccounts(hiddenAccounts);
-  }, [accounts]);
-
   return (
-    <Stack gap="$3">
+    <Box.Stack gap="$4">
       {isLoading && (
         <CardList>
           {[...Array(3)].map((_, i) => {
@@ -52,27 +52,32 @@ export function AccountList({
               isHidden={!showHidden && account.isHidden}
               isCurrent={account.isCurrent}
               onExport={onExport}
+              onToggleHidden={
+                (!canHideAccounts && !account.isHidden) || account.isCurrent
+                  ? undefined
+                  : onToggleHidden
+              }
             />
           ))}
         </CardList>
       )}
-      {!isLoading && anyHiddenAccounts && (
+      {!isLoading && hasHiddenAccounts && (
         <Button
           size="xs"
-          color="gray"
           variant="link"
           onPress={toggle}
           css={styles.hiddenBtn}
+          aria-label={`Toggle hidden accounts`}
         >
           {showHidden ? 'Hide' : 'Show'} hidden accounts
         </Button>
       )}
-    </Stack>
+    </Box.Stack>
   );
 }
 
 const styles = {
   hiddenBtn: cssObj({
-    color: '$gray8',
+    color: '$intentsBase8',
   }),
 };

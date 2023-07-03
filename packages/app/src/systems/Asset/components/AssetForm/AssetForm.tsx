@@ -1,4 +1,4 @@
-import { Stack, Input } from '@fuel-ui/react';
+import { Input, Box } from '@fuel-ui/react';
 
 import type { UseAssetFormReturn } from '../../hooks/useAssetForm';
 
@@ -13,7 +13,7 @@ export type AssetFormProps = {
 export function AssetForm({ form, isEditing, showOnlyId }: AssetFormProps) {
   const { control, formState } = form;
   return (
-    <Stack css={{ width: '100%' }} gap="$4">
+    <Box.Stack css={{ width: '100%' }} gap="$4">
       <ControlledField
         control={control}
         name="assetId"
@@ -26,7 +26,7 @@ export function AssetForm({ form, isEditing, showOnlyId }: AssetFormProps) {
             <Input.Field
               {...field}
               aria-label="Asset ID"
-              placeholder="ID of asset"
+              placeholder="Asset ID"
             />
           </Input>
         )}
@@ -44,7 +44,7 @@ export function AssetForm({ form, isEditing, showOnlyId }: AssetFormProps) {
                 <Input.Field
                   {...field}
                   aria-label="Asset name"
-                  placeholder="Name of asset"
+                  placeholder="Asset name"
                 />
               </Input>
             )}
@@ -60,7 +60,7 @@ export function AssetForm({ form, isEditing, showOnlyId }: AssetFormProps) {
                 <Input.Field
                   {...field}
                   aria-label="Asset symbol"
-                  placeholder="Symbol of asset"
+                  placeholder="Asset symbol"
                 />
               </Input>
             )}
@@ -74,14 +74,14 @@ export function AssetForm({ form, isEditing, showOnlyId }: AssetFormProps) {
               <Input>
                 <Input.Field
                   {...field}
-                  aria-label="Asset imageUrl"
-                  placeholder="Image URL of asset"
+                  aria-label="Asset image Url"
+                  placeholder="Asset image URL"
                 />
               </Input>
             )}
           />
         </>
       )}
-    </Stack>
+    </Box.Stack>
   );
 }

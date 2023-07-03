@@ -1,30 +1,32 @@
 /* eslint-disable no-console */
-import { Flex, Button } from '@fuel-ui/react';
+import { Box, Button } from '@fuel-ui/react';
 import { useState } from 'react';
 
-import { ExampleBox } from '~/src/components/ExampleBox';
-import { useFuel } from '~/src/hooks/useFuel';
-import { useLoading } from '~/src/hooks/useLoading';
+import { ExampleBox } from '../src/components/ExampleBox';
+import { useFuel } from '../src/hooks/useFuel';
+import { useLoading } from '../src/hooks/useLoading';
 
 export function Connect() {
   const [fuel, notDetected] = useFuel();
   const [connected, setConnected] = useState(false);
 
   const [handleConnect, isConnecting, errorConnect] = useLoading(async () => {
-    console.debug('Request connection to Wallet!');
-    /* example:start */
+    console.log('Request connection to Wallet!');
+    /* connect:start */
     const isConnected = await fuel.connect();
-    console.debug('Connection response', isConnected);
-    /* example:end */
+    console.log('Connection response', isConnected);
+    /* connect:end */
     setConnected(isConnected);
   });
 
   const [handleDisconnect, isDisconnecting, errorDisconnect] = useLoading(
     async () => {
-      console.debug('Request disconnection to Wallet!');
+      console.log('Request disconnection to Wallet!');
+      /* disconnect:start */
       await fuel.disconnect();
+      /* disconnect:end */
       setConnected(false);
-      console.debug('Disconnection response');
+      console.log('Disconnection response');
     }
   );
 
@@ -32,7 +34,7 @@ export function Connect() {
 
   return (
     <ExampleBox error={errorMessage}>
-      <Flex gap="$4">
+      <Box.Flex gap="$4">
         <Button
           onPress={handleConnect}
           isLoading={isConnecting}
@@ -47,7 +49,7 @@ export function Connect() {
         >
           {connected ? 'Disconnect' : 'Disconnected'}
         </Button>
-      </Flex>
+      </Box.Flex>
     </ExampleBox>
   );
 }

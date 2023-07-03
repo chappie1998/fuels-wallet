@@ -41,6 +41,18 @@ const selectors = {
         ...(assets?.find(({ assetId }) => assetId === balance.assetId) || {}),
       }));
   },
+  shownAccounts(state: AccountsMachineState) {
+    return state.context.accounts?.filter((acc) => !acc.isHidden);
+  },
+  hiddenAccounts(state: AccountsMachineState) {
+    return state.context.accounts?.filter((acc) => acc.isHidden);
+  },
+  hasHiddenAccounts(state: AccountsMachineState) {
+    return !!selectors.hiddenAccounts(state)?.length;
+  },
+  canHideAccounts(state: AccountsMachineState) {
+    return (selectors.shownAccounts(state)?.length || 0) > 1;
+  },
 };
 
 const listenerAccountFetcher = () => {
@@ -61,6 +73,22 @@ export function useAccounts() {
   const balanceAssets = store.useSelector(
     Services.accounts,
     selectors.balanceAssets(assets)
+  );
+  const shownAccounts = store.useSelector(
+    Services.accounts,
+    selectors.shownAccounts
+  );
+  const hiddenAccounts = store.useSelector(
+    Services.accounts,
+    selectors.shownAccounts
+  );
+  const hasHiddenAccounts = store.useSelector(
+    Services.accounts,
+    selectors.hasHiddenAccounts
+  );
+  const canHideAccounts = store.useSelector(
+    Services.accounts,
+    selectors.canHideAccounts
   );
 
   function closeDialog() {
@@ -96,16 +124,20 @@ export function useAccounts() {
     status,
     hasBalance,
     balanceAssets,
+    shownAccounts,
+    hiddenAccounts,
+    canHideAccounts,
+    hasHiddenAccounts,
     isLoading: status('loading'),
     handlers: {
       closeDialog,
-      goToAdd: store.openAccountsAdd,
       goToList: store.openAccountList,
       goToEdit: store.openAccountEdit,
       goToExport: store.openAccountExport,
       goToImport: store.openAccountImport,
       logout: store.logout,
       setCurrentAccount: store.setCurrentAccount,
+      toggleHideAccount: store.toggleHideAccount,
     },
   };
 }

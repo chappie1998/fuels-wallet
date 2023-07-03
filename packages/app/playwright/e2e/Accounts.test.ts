@@ -59,10 +59,10 @@ test.describe('Account', () => {
     ).click();
     await getByAriaLabel(page, `Edit ${data.accounts[0].name}`).click();
     await hasText(page, /Edit/i);
-    const inputName = await getInputByName(page, 'name');
+    const inputName = getInputByName(page, 'name');
     await expect(inputName).toBeFocused();
     await inputName.fill('Test 1');
-    const editBtn = await getButtonByText(page, /edit/i);
+    const editBtn = getButtonByText(page, /edit/i);
     expect(editBtn).toBeEnabled();
     await editBtn.click();
     await hasText(page, /Test 1/i);
@@ -86,6 +86,49 @@ test.describe('Account', () => {
     await hasText(page, data.accounts[0].privateKey);
   });
 
+  test('should be able to hide/unhide account', async () => {
+    await visit(page, '/wallet');
+    await hasText(page, /Assets/i);
+    await getByAriaLabel(page, 'Accounts').click();
+    await hasText(page, data.accounts[0].name);
+    await hasText(page, data.accounts[1].name);
+    await getByAriaLabel(
+      page,
+      `Account Actions ${data.accounts[1].name}`
+    ).click();
+    await getByAriaLabel(page, `Hide ${data.accounts[1].name}`).click();
+    await hasText(page, 'Show hidden accounts');
+    await page.getByText(data.accounts[1].name).isHidden();
+    await getByAriaLabel(page, 'Toggle hidden accounts').click();
+    await hasText(page, data.accounts[1].name);
+    await getByAriaLabel(
+      page,
+      `Account Actions ${data.accounts[1].name}`
+    ).click();
+    await getByAriaLabel(page, `Unhide ${data.accounts[1].name}`).click();
+    await page.getByText('Show hidden accounts').isHidden();
+  });
+
+  test('should not be able to hide primary account', async () => {
+    await visit(page, '/wallet');
+    await hasText(page, /Assets/i);
+    await getByAriaLabel(page, 'Accounts').click();
+    await hasText(page, data.accounts[0].name);
+    await hasText(page, data.accounts[1].name);
+    await getByAriaLabel(
+      page,
+      `Account Actions ${data.accounts[1].name}`
+    ).click();
+    await getByAriaLabel(page, `Hide ${data.accounts[1].name}`).click();
+    await hasText(page, 'Show hidden accounts');
+    await page.getByText(data.accounts[1].name).isHidden();
+    await getByAriaLabel(
+      page,
+      `Account Actions ${data.accounts[0].name}`
+    ).click();
+    await getByAriaLabel(page, `Hide ${data.accounts[0].name}`).isHidden();
+  });
+
   test('should fail if inform incorrect password, but work after trying again with correct one', async () => {
     await visit(page, '/wallet');
     await hasText(page, /Assets/i);
@@ -98,7 +141,7 @@ test.describe('Account', () => {
     await getByAriaLabel(page, `Export ${data.accounts[0].name}`).click();
 
     await hasText(page, 'Unlock your wallet to continue');
-    const passwordInput = await getByAriaLabel(page, 'Your Password');
+    const passwordInput = getByAriaLabel(page, 'Your Password');
     await passwordInput.type(`${WALLET_PASSWORD}1`);
     await getByAriaLabel(page, 'Unlock wallet').click();
     await hasText(page, /Invalid password/i);

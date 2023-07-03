@@ -5,6 +5,9 @@ import { Services } from '~/store';
 
 export function accountEvents(store: Store) {
   return {
+    reloadBalance() {
+      store.send(Services.accounts, { type: 'RELOAD_BALANCE' });
+    },
     updateAccounts() {
       store.send(Services.accounts, { type: 'REFRESH_ACCOUNTS' });
     },
@@ -17,6 +20,15 @@ export function accountEvents(store: Store) {
     logout() {
       store.send(Services.accounts, {
         type: 'LOGOUT',
+      });
+    },
+    toggleHideAccount(address: string, isHidden: boolean) {
+      store.send(Services.accounts, {
+        type: 'TOGGLE_HIDE_ACCOUNT',
+        input: {
+          address,
+          data: { isHidden },
+        },
       });
     },
   };
