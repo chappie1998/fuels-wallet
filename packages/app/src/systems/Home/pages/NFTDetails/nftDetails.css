@@ -1,0 +1,80 @@
+* {
+  box-sizing: border-box;
+}
+.textCapitalize {
+  text-transform: capitalize;
+}
+h2 {
+  text-align: center;
+  color: white;
+}
+.mb16 {
+  margin-bottom: 16px;
+}
+.p14 {
+  padding: 14px;
+}
+.dFlex {
+  display: flex;
+}
+.dBlock {
+  display: block;
+}
+.justifyBetween {
+  justify-content: space-between;
+}
+.borderBottom {
+  border-bottom: 1px solid black;
+}
+.borderImage {
+  border-radius: 6px;
+  object-fit: contain;
+}
+.colorWhite {
+  color: white;
+}
+.top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.paymentDetails {
+  width: 100%;
+}
+.paymentDetails ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background-color: rgb(42, 42, 42);
+  border-radius: 6px;
+}
+.paymentDetails ul li {
+  border-bottom: 1px solid black;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+.doubleButton {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+.input {
+  width: 100%;
+  padding: 14px;
+  background: rgb(24, 24, 24);
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(47, 47, 47);
+  border-radius: 6px;
+  color: white;
+  font-size: 16px;
+  line-height: 19px;
+  outline: none;
+}
+.listBottom {
+  margin: 0;
+  padding: 0;
+  background-color: rgb(42, 42, 42);
+  border-radius: 6px;
+}

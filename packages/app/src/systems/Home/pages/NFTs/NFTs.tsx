@@ -55,7 +55,7 @@ export function NFTs() {
                 <div>
                   <Link
                     to={Pages.nftDetails({
-                      contractId: `0x${  data.nft_contract}`,
+                      contractId: `0x${data.nft_contract}`,
                       token: data.token_id.toString(),
                     })}
                   >
@@ -78,7 +78,7 @@ export function NFTs() {
         <Button aria-label="Assets" variant="ghost" onPress={goToAssets}>
           Assets
         </Button>
-        <Button aria-label="NFTs" isLoading={isLoading}>
+        <Button aria-label="NFTs" intent="primary" isLoading={isLoading}>
           NFTs
         </Button>
       </Layout.BottomBar>

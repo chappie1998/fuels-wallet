@@ -62,22 +62,10 @@ export function Home() {
         </Box.Flex>
       </Layout.Content>
       <Layout.BottomBar>
-        <Button
-          aria-label="Assets"
-          // variant="ghost"
-          // color="gray"
-          // onPress={handlers.reject}
-          // onPress={() => navigate(Pages.nfts())}
-        >
+        <Button aria-label="Assets" intent="primary">
           Assets
         </Button>
-        <Button
-          aria-label="NFTs"
-          // onPress={handlers.sign}
-          // isLoading={isLoading}
-          variant="ghost"
-          onPress={goToNfts}
-        >
+        <Button aria-label="NFTs" variant="ghost" onPress={goToNfts}>
           NFTs
         </Button>
       </Layout.BottomBar>
