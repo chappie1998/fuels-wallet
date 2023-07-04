@@ -1,15 +1,14 @@
 import { Button } from '@fuel-ui/react';
-import { useEffect, useState } from 'react';
+import { NFTAbi__factory } from "fuel-wallet-repo/packages/contracts/nft/nft";
+import { Address } from 'fuels';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+
 import './nftDetails.css';
-// import { NFTAbi__factory } from '../../../../../../contracts/nft';
 
-import { Layout, Pages } from '~/systems/Core';
-
-// import { FetchMachine, WalletLockedCustom } from '~/systems/Core';
-// import { NetworkService } from '~/systems/Network';
-// import { TxInputs, TxService } from '~/systems/Transaction/services';
-// import { AccountService } from '~/systems/Account';
+import { AccountService } from '~/systems/Account';
+import { Layout, Pages , WalletLockedCustom } from '~/systems/Core';
+import { NetworkService } from '~/systems/Network';
 
 const AttrCard = (props: { attrName: string; attrValue: string }) => {
   return (
@@ -41,6 +40,8 @@ const style = {
 };
 
 export function NFTDetails() {
+  // const [toAddress, setToAddress] = useState();
+  const toAddressRef = useRef<any>(null);
   const [nft, setNft] = useState({
     name: '',
     image: '',
@@ -53,6 +54,46 @@ export function NFTDetails() {
   });
   const navigate = useNavigate();
   const { contractId, token } = useParams();
+
+  const onChangeHandler = () => {
+    console.log(toAddressRef.current.value);
+
+    try {
+      Address.fromString(toAddressRef.current.value).toB256();
+      setCurrentScreen({ screenName: 'screen3', props: nft });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const formatAddress = (address = toAddressRef.current.value) => {
+    return `${address.slice(0, 6)  }...${  address.slice(-4)}`;
+  };
+
+  const send = async () => {
+    console.log('transfer clicked');
+    const [network, account] = await Promise.all([
+      NetworkService.getSelectedNetwork(),
+      AccountService.getCurrentAccount(),
+    ]);
+    // if (!to || !network?.url || !account) {
+    if (!network?.url || !account) {
+      throw new Error('Missing params for transaction request');
+    }
+    const wallet = new WalletLockedCustom(account.address, network.url);
+    console.log(wallet.address.toB256());
+
+    const NFTContract = NFTAbi__factory.connect(contractId, wallet);
+    const transferFrom = await NFTContract.functions
+      .transfer_from(
+        { Address: { value: wallet.address.toB256() } },
+        { ContractId: { value: contractId } },
+        token
+      )
+      .txParams({ gasPrice: 50 })
+      .call();
+    console.log('transfer_from', transferFrom);
+  };
 
   const screens = {
     screen1: (nft: any) => (
@@ -135,7 +176,7 @@ export function NFTDetails() {
         <Layout.Content>
           <div>{nftData(nft.name, nft.image)}</div>
           <div>
-            <input className="input" type="text" />
+            <input ref={toAddressRef} className="input" type="text" />
           </div>
         </Layout.Content>
         <Layout.BottomBar>
@@ -148,13 +189,7 @@ export function NFTDetails() {
           >
             Cancel
           </Button>
-          <Button
-            aria-label="NFTs"
-            variant="ghost"
-            onPress={() =>
-              setCurrentScreen({ screenName: 'screen3', props: nft })
-            }
-          >
+          <Button aria-label="NFTs" variant="ghost" onPress={onChangeHandler}>
             Next
           </Button>
         </Layout.BottomBar>
@@ -174,16 +209,24 @@ export function NFTDetails() {
               className="borderImage"
             />
             <h1 className="colorWhite">{props.name}</h1>
-            <p>to Wallet 1 (8hkSe...eT3Yb)</p>
+            <p>
+              to Wallet 1(Eth) (
+              {formatAddress(
+                Address.fromString(toAddressRef.current.value).toB256()
+              )}
+              )
+            </p>
             <div className="paymentDetails">
               <ul>
                 <li>
                   <span>To</span>
-                  <span className="colorWhite">Wallet 1 (8hkSe...eT3Yb)</span>
+                  <span className="colorWhite">
+                    Wallet 1 ({formatAddress()})
+                  </span>
                 </li>
                 <li>
                   <span>Network</span>
-                  <span className="colorWhite">Solana</span>
+                  <span className="colorWhite">Fuel</span>
                 </li>
                 <li>
                   <span>Network fee</span>
@@ -196,7 +239,7 @@ export function NFTDetails() {
         <Layout.BottomBar>
           <Button
             aria-label="Assets"
-            // intent="primary"
+            variant="ghost"
             onPress={() => {
               setCurrentScreen({
                 screenName: 'screen2',
@@ -206,8 +249,8 @@ export function NFTDetails() {
           >
             Cancel
           </Button>
-          <Button aria-label="NFTs" variant="ghost" onPress={() => {}}>
-            Send
+          <Button aria-label="NFTs" intent="primary" onPress={send}>
+            Approve
           </Button>
         </Layout.BottomBar>
       </div>
@@ -296,31 +339,6 @@ export function NFTDetails() {
       </div>
     );
   };
-
-  // const next = async () => {
-  //   console.log('transfer clicked');
-  //   const [network, account] = await Promise.all([
-  //     NetworkService.getSelectedNetwork(),
-  //     AccountService.getCurrentAccount(),
-  //   ]);
-  //   // if (!to || !network?.url || !account) {
-  //   if (!network?.url || !account) {
-  //     throw new Error('Missing params for transaction request');
-  //   }
-  //   const wallet = new WalletLockedCustom(account.address, network.url);
-  //   console.log(wallet.address.toB256());
-
-  //   const NFTContract = NFTAbi__factory.connect(contractId, wallet);
-  //   const transfer_from = await NFTContract.functions
-  //     .transfer_from(
-  //       { Address: { value: wallet.address.toB256() } },
-  //       { ContractId: { value: contractId } },
-  //       token
-  //     )
-  //     .txParams({ gasPrice: 50 })
-  //     .call();
-  //   console.log('transfer_from', transfer_from);
-  // };
 
   return (
     <Layout title="Nft Details">
